@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 390">
+<defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#dce7cf"/><stop offset="1" stop-color="#f0eddb"/></linearGradient><linearGradient id="grass" x2="0" y2="1"><stop stop-color="#9eae6d"/><stop offset="1" stop-color="#647d4c"/></linearGradient></defs>
+<rect width="600" height="390" rx="18" fill="url(#sky)"/><circle cx="470" cy="78" r="35" fill="#f6d99c" opacity=".9"/>
+<path d="M0 265 120 190 240 260 365 170 510 260 600 210V390H0Z" fill="#a9b98d"/><path d="M0 300 150 235 270 290 410 220 600 290V390H0Z" fill="#7f9863"/>
+<g transform="translate(195 112)"><path d="M0 65 100 10 200 65 100 122Z" fill="#a9c47b"/><path d="M0 65 100 122V250L0 192Z" fill="#779455"/><path d="M100 122 200 65V192L100 250Z" fill="#5f7946"/><path d="M0 65 100 10 200 65 100 122Z" fill="#c2d18d"/><path d="M0 65 34 46 66 65 33 84Z" fill="#8da967"/><path d="M100 10 133 29 100 48 67 29Z" fill="#8da967"/><path d="M134 85 168 66 200 84 167 104Z" fill="#8da967"/></g>
+<g transform="translate(95 250)"><path d="M0 22 38 0 76 22 38 44Z" fill="#c3d18e"/><path d="M0 22 38 44V92L0 70Z" fill="#819b5d"/><path d="M38 44 76 22V70L38 92Z" fill="#647e49"/></g>
+<g fill="#6f8750"><rect x="480" y="225" width="12" height="50"/><rect x="465" y="213" width="42" height="18"/><rect x="455" y="230" width="22" height="18"/></g>
+</svg>

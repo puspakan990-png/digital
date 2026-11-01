@@ -1,0 +1,722 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DigitalNep | Admin Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+
+<style>
+:root {
+  --bg:#fbfaf7;--card:#fff;--text:#20211f;--muted:#77796f;
+  --green:#899c5d;--light:#d9e5a4;--border:#e9e8df;
+  --red:#c94b43;--shadow:0 8px 30px rgba(32,33,31,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:17px 5%;display:flex;align-items:center;justify-content:space-between;gap:15px;position:sticky;top:0;z-index:10}
+.brand{font:700 23px 'Space Grotesk';letter-spacing:-1px}
+.brand span{color:var(--green)}
+.top-actions{display:flex;gap:10px;align-items:center}
+.container{max-width:1250px;margin:auto;padding:30px 5% 60px}
+h1,h2,h3{font-family:'Space Grotesk';margin-top:0}
+h1{font-size:30px;margin-bottom:6px}
+.subtitle{color:var(--muted);margin:0 0 25px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:25px}
+.tab{border:1px solid var(--border);background:white;padding:11px 18px;border-radius:10px;font-weight:700;color:var(--muted)}
+.tab.active{background:var(--text);color:white;border-color:var(--text)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:25px}
+.stat,.panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;box-shadow:var(--shadow)}
+.stat-label{color:var(--muted);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.stat-value{font:700 26px 'Space Grotesk';margin-top:9px;overflow-wrap:anywhere}
+.stat-note{font-size:12px;color:var(--muted);margin-top:5px}
+.panel{margin-bottom:20px}
+.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:17px}
+.panel-head h2{font-size:20px;margin:0}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.field{display:flex;flex-direction:column;gap:7px}
+.field.full{grid-column:1/-1}
+label{font-size:13px;font-weight:700}
+input,select,textarea{width:100%;padding:12px 13px;border:1px solid var(--border);border-radius:9px;background:#fff;color:var(--text);outline:none;min-width:0}
+input:focus,select:focus,textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(137,156,93,.12)}
+textarea{resize:vertical;min-height:80px}
+.btn{border:0;border-radius:9px;padding:11px 16px;font-weight:700;background:var(--green);color:white}
+.btn.dark{background:var(--text)}
+.btn.light{background:#eef1e6;color:var(--text)}
+.btn.danger{background:#fbe9e7;color:var(--red)}
+.btn.small{padding:8px 11px;font-size:12px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px}
+.toolbar input,.toolbar select{max-width:240px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:760px}
+th,td{text-align:left;padding:13px 12px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+th{font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px}
+td strong{font-weight:700}
+.muted{color:var(--muted)}
+.pill{display:inline-block;padding:5px 9px;border-radius:30px;font-size:11px;font-weight:700;background:#eef1e6;color:#53633a}
+.pill.pending{background:#fff2d9;color:#92651d}
+.pill.unpaid,.pill.cancelled{background:#fbe9e7;color:#b43d35}
+.pill.processing{background:#e9efff;color:#4964a1}
+.pill.completed,.pill.paid{background:#e7f3e6;color:#39733b}
+.hidden{display:none!important}
+.message{padding:12px 15px;border-radius:9px;margin-bottom:15px;font-size:13px;display:none}
+.message.show{display:block}
+.message.error{background:#fbe9e7;color:#a9342d}
+.message.success{background:#e7f3e6;color:#39733b}
+.login-wrap{max-width:420px;margin:9vh auto;padding:20px}
+.login-wrap .panel{padding:28px}
+.product-image{width:43px;height:48px;object-fit:cover;border-radius:7px;background:#eee}
+.empty{text-align:center;color:var(--muted);padding:30px}
+.section{display:none}
+.section.active{display:block}
+.preview{max-width:110px;max-height:110px;object-fit:cover;border-radius:10px;margin-top:8px}
+@media(max-width:800px){.stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){
+ .container{padding:22px 4% 45px}
+ .topbar{padding:14px 4%}
+ h1{font-size:25px}
+ .stats{gap:9px}
+ .stat{padding:14px}
+ .stat-value{font-size:21px}
+ .form-grid{grid-template-columns:1fr}
+ .field.full{grid-column:auto}
+ .toolbar input,.toolbar select{max-width:none;flex:1 1 100%}
+ .tabs{display:grid;grid-template-columns:repeat(2,1fr)}
+ .tab{padding:10px 7px}
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+  <div class="brand">Digital<span>Nep.</span> <small style="font:500 12px 'DM Sans';color:#888">ADMIN</small></div>
+  <div class="top-actions">
+    <span id="adminEmail" class="muted" style="font-size:12px"></span>
+    <button class="btn danger small hidden" id="logoutBtn" onclick="logout()">Logout</button>
+  </div>
+</header>
+
+<div id="loginScreen" class="login-wrap">
+  <div class="panel">
+    <h2>Admin Login</h2>
+    <p class="muted">Sign in to manage DigitalNep.</p>
+    <div id="loginMessage" class="message"></div>
+    <form id="loginForm">
+      <div class="field" style="margin-bottom:14px">
+        <label>Email</label>
+        <input id="loginEmail" type="email" required placeholder="Admin email">
+      </div>
+      <div class="field" style="margin-bottom:18px">
+        <label>Password</label>
+        <input id="loginPassword" type="password" required placeholder="Password">
+      </div>
+      <button class="btn dark" style="width:100%">Login</button>
+    </form>
+  </div>
+</div>
+
+<main id="app" class="container hidden">
+  <h1>Admin Dashboard</h1>
+  <p class="subtitle">Manage your products, orders and sales records.</p>
+
+  <div id="mainMessage" class="message"></div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="dashboard">Dashboard</button>
+    <button class="tab" data-tab="sales">Sales Records</button>
+    <button class="tab" data-tab="products">Products</button>
+  </div>
+
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="section active">
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Total Revenue</div>
+        <div class="stat-value" id="totalRevenue">Rs. 0</div>
+        <div class="stat-note">Excludes cancelled orders</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Total Profit</div>
+        <div class="stat-value" id="totalProfit">Rs. 0</div>
+        <div class="stat-note">Based on recorded cost prices</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Total Orders</div>
+        <div class="stat-value" id="totalOrders">0</div>
+        <div class="stat-note">Non-cancelled sales</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Pending Payments</div>
+        <div class="stat-value" id="pendingAmount">Rs. 0</div>
+        <div class="stat-note">Pending and unpaid amounts</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Recent Sales</h2>
+        <button class="btn small" onclick="showTab('sales')">View all sales</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Date</th><th>Customer</th><th>Product</th><th>Total</th><th>Payment</th></tr></thead>
+          <tbody id="recentSales"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- SALES -->
+  <section id="sales" class="section">
+    <div class="panel">
+      <div class="panel-head">
+        <h2 id="saleFormTitle">Add New Sale</h2>
+        <button class="btn light small" onclick="resetSaleForm()">Clear form</button>
+      </div>
+      <form id="saleForm">
+        <input type="hidden" id="saleId">
+        <div class="form-grid">
+          <div class="field">
+            <label>Customer Name *</label>
+            <input id="customerName" required placeholder="Customer name">
+          </div>
+          <div class="field">
+            <label>Customer Phone</label>
+            <input id="customerPhone" placeholder="98XXXXXXXX">
+          </div>
+          <div class="field full">
+            <label>Product *</label>
+            <select id="saleProduct" required>
+              <option value="">Select a product</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Quantity *</label>
+            <input id="saleQuantity" type="number" min="1" step="1" value="1" required>
+          </div>
+          <div class="field">
+            <label>Selling Price per item (Rs.) *</label>
+            <input id="salePrice" type="number" min="0" step="0.01" required placeholder="200">
+          </div>
+          <div class="field">
+            <label>Cost Price per item (Rs.)</label>
+            <input id="costPrice" type="number" min="0" step="0.01" value="0" placeholder="Your purchase/cost price">
+          </div>
+          <div class="field">
+            <label>Sale Date *</label>
+            <input id="saleDate" type="date" required>
+          </div>
+          <div class="field">
+            <label>Payment Method</label>
+            <select id="paymentMethod">
+              <option>Cash</option>
+              <option>eSewa</option>
+              <option>Khalti</option>
+              <option>Bank Transfer</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Payment Status</label>
+            <select id="paymentStatus">
+              <option>Paid</option>
+              <option>Pending</option>
+              <option>Unpaid</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Order Status</label>
+            <select id="orderStatus">
+              <option>Completed</option>
+              <option>Processing</option>
+              <option>Cancelled</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label>Notes</label>
+            <textarea id="saleNotes" placeholder="Transaction ID, customer details, etc."></textarea>
+          </div>
+        </div>
+        <p class="muted" id="saleCalculation" style="font-size:13px;margin:15px 0">Total: Rs. 0 | Estimated profit: Rs. 0</p>
+        <button class="btn dark" id="saveSaleBtn">Save Sale</button>
+      </form>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>All Sales Records</h2>
+        <button class="btn light small" onclick="exportCSV()">Export CSV</button>
+      </div>
+      <div class="toolbar">
+        <input id="salesSearch" placeholder="Search customer or product...">
+        <select id="salesPaymentFilter">
+          <option value="">All payment statuses</option>
+          <option>Paid</option><option>Pending</option><option>Unpaid</option>
+        </select>
+        <select id="salesOrderFilter">
+          <option value="">All order statuses</option>
+          <option>Completed</option><option>Processing</option><option>Cancelled</option>
+        </select>
+        <input id="dateFrom" type="date" aria-label="From date">
+        <input id="dateTo" type="date" aria-label="To date">
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th><th>Customer</th><th>Product</th><th>Qty</th>
+              <th>Total</th><th>Profit</th><th>Payment</th><th>Order</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="salesTable"></tbody>
+        </table>
+      </div>
+      <p id="salesCount" class="muted" style="font-size:12px"></p>
+    </div>
+  </section>
+
+  <!-- PRODUCTS -->
+  <section id="products" class="section">
+    <div class="panel">
+      <div class="panel-head">
+        <h2 id="productFormTitle">Add New Product</h2>
+        <button class="btn light small" onclick="resetProductForm()">Clear form</button>
+      </div>
+      <form id="productForm">
+        <input type="hidden" id="productId">
+        <div class="form-grid">
+          <div class="field">
+            <label>Product Name *</label>
+            <input id="productName" required>
+          </div>
+          <div class="field">
+            <label>Price (Rs.) *</label>
+            <input id="productPrice" type="number" min="0" step="0.01" required>
+          </div>
+          <div class="field full">
+            <label>Description</label>
+            <textarea id="productDescription"></textarea>
+          </div>
+          <div class="field full">
+            <label>Product Image</label>
+            <input id="productImage" type="file" accept="image/png,image/jpeg,image/webp">
+            <img id="productPreview" class="preview hidden" alt="Preview">
+            <small class="muted">JPG, PNG or WEBP. Maximum 5 MB.</small>
+          </div>
+        </div>
+        <button class="btn dark" id="saveProductBtn" style="margin-top:15px">Save Product</button>
+      </form>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2>Your Products</h2></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Image</th><th>Name</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="productsTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+const config = window.DIGITALNEP_CONFIG;
+if (!config || !config.SUPABASE_URL || !config.SUPABASE_KEY) {
+  alert("Supabase config missing. Check config.js.");
+}
+const client = window.supabase.createClient(config.SUPABASE_URL, config.SUPABASE_KEY);
+const BUCKET = "product-images";
+
+let sales = [];
+let products = [];
+let editingSale = false;
+let editingProduct = false;
+
+const $ = id => document.getElementById(id);
+const money = value => "Rs. " + Number(value || 0).toLocaleString("en-IN", {minimumFractionDigits:2,maximumFractionDigits:2});
+const today = () => new Date().toLocaleDateString("en-CA");
+
+function message(text, type="success", target="mainMessage") {
+  const el = $(target);
+  el.textContent = text;
+  el.className = "message show " + type;
+  setTimeout(() => el.classList.remove("show"), 4500);
+}
+
+function statusClass(value) {
+  return String(value || "").toLowerCase().replace(/\s+/g,"-");
+}
+
+function showTab(name) {
+  document.querySelectorAll(".tab").forEach(b => b.classList.toggle("active",b.dataset.tab===name));
+  document.querySelectorAll(".section").forEach(s => s.classList.toggle("active",s.id===name));
+  if (name==="dashboard") renderDashboard();
+  if (name==="sales") renderSales();
+  if (name==="products") renderProducts();
+}
+document.querySelectorAll(".tab").forEach(b => b.addEventListener("click",()=>showTab(b.dataset.tab)));
+
+async function checkSession() {
+  const {data:{session}} = await client.auth.getSession();
+  if (!session) return showLogin();
+  const {data,error} = await client.rpc("is_admin");
+  if (error || data !== true) {
+    await client.auth.signOut();
+    return showLogin("This account is not an authorized admin.");
+  }
+  $("loginScreen").classList.add("hidden");
+  $("app").classList.remove("hidden");
+  $("logoutBtn").classList.remove("hidden");
+  $("adminEmail").textContent = session.user.email || "";
+  await refreshAll();
+}
+
+function showLogin(errorText="") {
+  $("loginScreen").classList.remove("hidden");
+  $("app").classList.add("hidden");
+  $("logoutBtn").classList.add("hidden");
+  if (errorText) message(errorText,"error","loginMessage");
+}
+
+$("loginForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const btn=e.submitter;
+  btn.disabled=true;btn.textContent="Signing in...";
+  const {error}=await client.auth.signInWithPassword({
+    email:$("loginEmail").value.trim(),
+    password:$("loginPassword").value
+  });
+  btn.disabled=false;btn.textContent="Login";
+  if(error) return message(error.message,"error","loginMessage");
+  await checkSession();
+});
+
+async function logout() {
+  await client.auth.signOut();
+  showLogin();
+}
+
+async function refreshAll() {
+  await Promise.all([loadProducts(),loadSales()]);
+  renderDashboard();
+  renderSales();
+  renderProducts();
+  fillProductSelect();
+}
+
+async function loadProducts() {
+  const {data,error}=await client.from("products").select("*").order("created_at",{ascending:false});
+  if(error) throw error;
+  products=data||[];
+}
+
+async function loadSales() {
+  const {data,error}=await client.from("sales").select("*").order("sale_date",{ascending:false}).order("created_at",{ascending:false});
+  if(error) throw error;
+  sales=data||[];
+}
+
+/* DASHBOARD */
+function renderDashboard() {
+  const valid=sales.filter(s=>s.order_status!=="Cancelled");
+  const revenue=valid.reduce((a,s)=>a+Number(s.total_amount||0),0);
+  const profit=valid.reduce((a,s)=>a+Number(s.profit||0),0);
+  const pending=valid.filter(s=>s.payment_status!=="Paid").reduce((a,s)=>a+Number(s.total_amount||0),0);
+  $("totalRevenue").textContent=money(revenue);
+  $("totalProfit").textContent=money(profit);
+  $("totalOrders").textContent=valid.length;
+  $("pendingAmount").textContent=money(pending);
+
+  const recent=[...sales].slice(0,7);
+  $("recentSales").innerHTML=recent.length?recent.map(s=>`
+    <tr>
+      <td>${escapeHTML(s.sale_date)}</td>
+      <td><strong>${escapeHTML(s.customer_name)}</strong></td>
+      <td>${escapeHTML(s.product_name)}</td>
+      <td>${money(s.total_amount)}</td>
+      <td><span class="pill ${statusClass(s.payment_status)}">${escapeHTML(s.payment_status)}</span></td>
+    </tr>`).join(""):`<tr><td colspan="5" class="empty">No sales recorded yet.</td></tr>`;
+}
+
+/* SALES */
+function fillProductSelect() {
+  const select=$("saleProduct");
+  const old=select.value;
+  select.innerHTML='<option value="">Select a product</option>'+products.map(p=>
+    `<option value="${p.id}">${escapeHTML(p.name)} — ${money(p.price)}</option>`
+  ).join("");
+  if(old) select.value=old;
+}
+
+$("saleProduct").addEventListener("change",()=>{
+  const p=products.find(x=>x.id===$("saleProduct").value);
+  if(p) $("salePrice").value=Number(p.price||0);
+  updateCalculation();
+});
+["saleQuantity","salePrice","costPrice"].forEach(id=>$(id).addEventListener("input",updateCalculation));
+
+function updateCalculation() {
+  const qty=Math.max(0,Number($("saleQuantity").value||0));
+  const price=Math.max(0,Number($("salePrice").value||0));
+  const cost=Math.max(0,Number($("costPrice").value||0));
+  $("saleCalculation").textContent=`Total: ${money(qty*price)} | Estimated profit: ${money(qty*(price-cost))}`;
+}
+
+function resetSaleForm() {
+  $("saleForm").reset();
+  $("saleId").value="";
+  $("saleDate").value=today();
+  $("saleQuantity").value=1;
+  $("saleFormTitle").textContent="Add New Sale";
+  $("saveSaleBtn").textContent="Save Sale";
+  editingSale=false;
+  updateCalculation();
+}
+
+$("saleForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const product=products.find(p=>p.id===$("saleProduct").value);
+  if(!product) return message("Please select a product.","error");
+  const quantity=Number($("saleQuantity").value);
+  const unitPrice=Number($("salePrice").value);
+  const costPrice=Number($("costPrice").value||0);
+  if(!Number.isInteger(quantity)||quantity<1||unitPrice<0||costPrice<0)
+    return message("Please enter valid quantity and prices.","error");
+
+  const payload={
+    customer_name:$("customerName").value.trim(),
+    customer_phone:$("customerPhone").value.trim()||null,
+    product_id:product.id,
+    product_name:product.name,
+    quantity,
+    unit_price:unitPrice,
+    cost_price:costPrice,
+    payment_method:$("paymentMethod").value,
+    payment_status:$("paymentStatus").value,
+    order_status:$("orderStatus").value,
+    sale_date:$("saleDate").value,
+    notes:$("saleNotes").value.trim()||null
+  };
+  const id=$("saleId").value;
+  const btn=$("saveSaleBtn");
+  btn.disabled=true;btn.textContent="Saving...";
+  const result=id
+    ? await client.from("sales").update(payload).eq("id",id)
+    : await client.from("sales").insert(payload);
+  btn.disabled=false;btn.textContent=id?"Update Sale":"Save Sale";
+  if(result.error) return message(result.error.message,"error");
+  message(id?"Sale updated successfully.":"Sale recorded successfully.");
+  resetSaleForm();
+  await loadSales();
+  renderSales();
+  renderDashboard();
+});
+
+function renderSales() {
+  const search=$("salesSearch").value.toLowerCase().trim();
+  const pay=$("salesPaymentFilter").value;
+  const order=$("salesOrderFilter").value;
+  const from=$("dateFrom").value;
+  const to=$("dateTo").value;
+  const filtered=sales.filter(s=>{
+    const text=(s.customer_name+" "+(s.customer_phone||"")+" "+s.product_name).toLowerCase();
+    return (!search||text.includes(search)) &&
+      (!pay||s.payment_status===pay) &&
+      (!order||s.order_status===order) &&
+      (!from||s.sale_date>=from) &&
+      (!to||s.sale_date<=to);
+  });
+  $("salesCount").textContent=`Showing ${filtered.length} of ${sales.length} records`;
+  $("salesTable").innerHTML=filtered.length?filtered.map(s=>`
+    <tr>
+      <td>${escapeHTML(s.sale_date)}</td>
+      <td><strong>${escapeHTML(s.customer_name)}</strong><br><span class="muted">${escapeHTML(s.customer_phone||"")}</span></td>
+      <td>${escapeHTML(s.product_name)}</td>
+      <td>${s.quantity}</td>
+      <td>${money(s.total_amount)}</td>
+      <td>${money(s.profit)}</td>
+      <td><span class="pill ${statusClass(s.payment_status)}">${escapeHTML(s.payment_status)}</span></td>
+      <td><span class="pill ${statusClass(s.order_status)}">${escapeHTML(s.order_status)}</span></td>
+      <td><div class="actions">
+        <button class="btn light small" onclick="editSale('${s.id}')">Edit</button>
+        <button class="btn danger small" onclick="deleteSale('${s.id}')">Delete</button>
+      </div></td>
+    </tr>`).join(""):`<tr><td colspan="9" class="empty">No matching sales found.</td></tr>`;
+}
+
+["salesSearch","salesPaymentFilter","salesOrderFilter","dateFrom","dateTo"].forEach(id=>{
+  $(id).addEventListener(id==="salesSearch"?"input":"change",renderSales);
+});
+
+function editSale(id) {
+  const s=sales.find(x=>x.id===id);
+  if(!s) return;
+  showTab("sales");
+  $("saleId").value=s.id;
+  $("customerName").value=s.customer_name;
+  $("customerPhone").value=s.customer_phone||"";
+  $("saleProduct").value=s.product_id||"";
+  $("saleQuantity").value=s.quantity;
+  $("salePrice").value=s.unit_price;
+  $("costPrice").value=s.cost_price;
+  $("saleDate").value=s.sale_date;
+  $("paymentMethod").value=s.payment_method;
+  $("paymentStatus").value=s.payment_status;
+  $("orderStatus").value=s.order_status;
+  $("saleNotes").value=s.notes||"";
+  $("saleFormTitle").textContent="Edit Sale";
+  $("saveSaleBtn").textContent="Update Sale";
+  editingSale=true;
+  updateCalculation();
+  $("saleForm").scrollIntoView({behavior:"smooth"});
+}
+
+async function deleteSale(id) {
+  if(!confirm("Delete this sales record permanently?")) return;
+  const {error}=await client.from("sales").delete().eq("id",id);
+  if(error) return message(error.message,"error");
+  message("Sales record deleted.");
+  await loadSales();renderSales();renderDashboard();
+}
+
+function exportCSV() {
+  const rows=[["Date","Customer","Phone","Product","Quantity","Unit Price","Cost Price","Total","Profit","Payment Method","Payment Status","Order Status","Notes"]];
+  sales.forEach(s=>rows.push([
+    s.sale_date,s.customer_name,s.customer_phone||"",s.product_name,s.quantity,
+    s.unit_price,s.cost_price,s.total_amount,s.profit,s.payment_method,
+    s.payment_status,s.order_status,s.notes||""
+  ]));
+  const csv=rows.map(row=>row.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\r\n");
+  const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download="digitalnep-sales-"+today()+".csv";a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* PRODUCTS */
+$("productImage").addEventListener("change",()=>{
+  const file=$("productImage").files[0];
+  if(!file){$("productPreview").classList.add("hidden");return;}
+  if(file.size>5*1024*1024){message("Image must be under 5 MB.","error");$("productImage").value="";return;}
+  $("productPreview").src=URL.createObjectURL(file);
+  $("productPreview").classList.remove("hidden");
+});
+
+function resetProductForm() {
+  $("productForm").reset();
+  $("productId").value="";
+  $("productPreview").classList.add("hidden");
+  $("productFormTitle").textContent="Add New Product";
+  $("saveProductBtn").textContent="Save Product";
+  editingProduct=false;
+}
+
+$("productForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const id=$("productId").value;
+  const file=$("productImage").files[0];
+  const btn=$("saveProductBtn");
+  btn.disabled=true;btn.textContent="Saving...";
+  let image_url=null,image_path=null;
+  const old=products.find(p=>p.id===id);
+
+  if(file) {
+    if(file.size>5*1024*1024){btn.disabled=false;btn.textContent=id?"Update Product":"Save Product";return message("Image must be under 5 MB.","error");}
+    const ext=file.name.split(".").pop().toLowerCase();
+    const path=`${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const {error:uploadError}=await client.storage.from(BUCKET).upload(path,file,{upsert:false});
+    if(uploadError){btn.disabled=false;btn.textContent=id?"Update Product":"Save Product";return message(uploadError.message,"error");}
+    image_path=path;
+    image_url=client.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+  }
+
+  const payload={
+    name:$("productName").value.trim(),
+    price:Number($("productPrice").value),
+    description:$("productDescription").value.trim(),
+    ...(file?{image_url,image_path}:{})
+  };
+  let result;
+  if(id) result=await client.from("products").update(payload).eq("id",id);
+  else result=await client.from("products").insert(payload);
+
+  if(result.error) {
+    if(image_path) await client.storage.from(BUCKET).remove([image_path]);
+    btn.disabled=false;btn.textContent=id?"Update Product":"Save Product";
+    return message(result.error.message,"error");
+  }
+
+  if(id&&file&&old?.image_path) {
+    await client.storage.from(BUCKET).remove([old.image_path]);
+  }
+  btn.disabled=false;btn.textContent=id?"Update Product":"Save Product";
+  message(id?"Product updated successfully.":"Product added successfully.");
+  resetProductForm();
+  await loadProducts();renderProducts();fillProductSelect();
+});
+
+function renderProducts() {
+  $("productsTable").innerHTML=products.length?products.map(p=>`
+    <tr>
+      <td>${p.image_url?`<img class="product-image" src="${escapeHTML(p.image_url)}" alt="">`:"—"}</td>
+      <td><strong>${escapeHTML(p.name)}</strong></td>
+      <td>${money(p.price)}</td>
+      <td><span class="pill ${p.active===false?"unpaid":"paid"}">${p.active===false?"Inactive":"Active"}</span></td>
+      <td><div class="actions">
+        <button class="btn light small" onclick="editProduct('${p.id}')">Edit</button>
+        <button class="btn danger small" onclick="deleteProduct('${p.id}')">Delete</button>
+      </div></td>
+    </tr>`).join(""):`<tr><td colspan="5" class="empty">No products yet.</td></tr>`;
+}
+
+function editProduct(id) {
+  const p=products.find(x=>x.id===id);
+  if(!p)return;
+  showTab("products");
+  $("productId").value=p.id;
+  $("productName").value=p.name;
+  $("productPrice").value=p.price;
+  $("productDescription").value=p.description||"";
+  if(p.image_url){$("productPreview").src=p.image_url;$("productPreview").classList.remove("hidden");}
+  $("productFormTitle").textContent="Edit Product";
+  $("saveProductBtn").textContent="Update Product";
+  editingProduct=true;
+  $("productForm").scrollIntoView({behavior:"smooth"});
+}
+
+async function deleteProduct(id) {
+  const p=products.find(x=>x.id===id);
+  if(!p||!confirm(`Delete "${p.name}" permanently?`))return;
+  const {error}=await client.from("products").delete().eq("id",id);
+  if(error)return message(error.message,"error");
+  if(p.image_path) await client.storage.from(BUCKET).remove([p.image_path]);
+  message("Product deleted.");
+  await loadProducts();renderProducts();fillProductSelect();
+}
+
+function escapeHTML(value) {
+  return String(value??"").replace(/[&<>"']/g,ch=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[ch]);
+}
+
+client.auth.onAuthStateChange((event,session)=>{
+  if(event==="SIGNED_OUT")showLogin();
+});
+
+$("saleDate").value=today();
+checkSession().catch(err=>message(err.message,"error"));
+</script>
+</body>
+</html>
