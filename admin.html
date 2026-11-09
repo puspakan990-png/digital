@@ -349,9 +349,7 @@ td strong{font-weight:700}
   <div class="panel">
     <div class="panel-head">
       <h2 id="efootballFormTitle">Add Coin Package</h2>
-      <button class="btn light small" onclick="resetEfootballForm()">
-        Clear form
-      </button>
+      <button class="btn light small" onclick="resetEfootballForm()">Clear form</button>
     </div>
 
     <form id="efootballForm">
@@ -359,25 +357,23 @@ td strong{font-weight:700}
 
       <div class="form-grid">
         <div class="field">
-          <label>Coin Amount *</label>
-          <input
-            id="efootballCoins"
-            type="number"
-            min="1"
-            step="1"
-            required
-            placeholder="Example: 100">
+          <label>Coin Amount (total) *</label>
+          <input id="efootballCoins" type="number" min="1" step="1" required placeholder="Example: 2000">
         </div>
 
         <div class="field">
           <label>Price (Rs.) *</label>
-          <input
-            id="efootballPrice"
-            type="number"
-            min="0"
-            step="0.01"
-            required
-            placeholder="Example: 150">
+          <input id="efootballPrice" type="number" min="0" step="0.01" required placeholder="Example: 2280">
+        </div>
+
+        <div class="field">
+          <label>Paid Coins (optional)</label>
+          <input id="efootballPaid" type="number" min="0" step="1" placeholder="Example: 1842">
+        </div>
+
+        <div class="field">
+          <label>Free Coins (auto-filled)</label>
+          <input id="efootballFree" type="number" min="0" step="1" placeholder="Example: 158">
         </div>
 
         <div class="field">
@@ -390,24 +386,18 @@ td strong{font-weight:700}
       </div>
 
       <button type="submit" class="btn dark" id="saveEfootballBtn" style="margin-top:15px">
-  Save Coin Package
-</button>
+        Save Coin Package
+      </button>
     </form>
   </div>
 
   <div class="panel">
-    <div class="panel-head">
-      <h2>Your eFootball Packages</h2>
-    </div>
-
+    <div class="panel-head"><h2>Your eFootball Packages</h2></div>
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>Coins</th>
-            <th>Price</th>
-            <th>Status</th>
-            <th>Actions</th>
+            <th>Coins</th><th>Paid</th><th>Free</th><th>Price</th><th>Status</th><th>Actions</th>
           </tr>
         </thead>
         <tbody id="efootballTable"></tbody>
@@ -536,47 +526,9 @@ async function loadEfootballPackages() {
 }
 
 
-function renderEfootballPackages() {
-  const table = $("efootballTable");
 
-  if (!table) return;
 
-  if (efootballPackages.length === 0) {
-    table.innerHTML = `
-      <tr>
-        <td colspan="4" class="empty">
-          No eFootball packages added yet.
-        </td>
-      </tr>
-    `;
-    return;
-  }
-
-  table.innerHTML = efootballPackages.map(pkg => `
-    <tr>
-      <td>${Number(pkg.coin_amount).toLocaleString("en-IN")} Coins</td>
-      <td>${money(pkg.price)}</td>
-      <td>
-        <span class="pill ${pkg.active ? "paid" : "unpaid"}">
-          ${pkg.active ? "Active" : "Inactive"}
-        </span>
-      </td>
-      <td>
-        <div class="actions">
-          <button class="btn light small"
-            onclick="editEfootballPackage('${pkg.id}')">
-            Edit
-          </button>
-
-          <button class="btn danger small"
-            onclick="deleteEfootballPackage('${pkg.id}')">
-            Delete
-          </button>
-        </div>
-      </td>
-    </tr>
-  `).join("");
-}
+ 
 
 
 async function loadSales() {
@@ -874,24 +826,78 @@ function escapeHTML(value) {
 }
 
 
+
+
+
+/* ===== EFOOTBALL PACKAGES ===== */
+const fmtN = n => Number(n).toLocaleString("en-IN");
+
+function renderEfootballPackages() {
+  const table = $("efootballTable");
+  if (!table) return;
+
+  if (efootballPackages.length === 0) {
+    table.innerHTML = `<tr><td colspan="6" class="empty">No eFootball packages added yet.</td></tr>`;
+    return;
+  }
+
+  table.innerHTML = efootballPackages.map(pkg => `
+    <tr>
+      <td><strong>${fmtN(pkg.coin_amount)}</strong></td>
+      <td>${pkg.paid_coins != null ? fmtN(pkg.paid_coins) : "—"}</td>
+      <td>${pkg.free_coins != null ? fmtN(pkg.free_coins) : "—"}</td>
+      <td>${money(pkg.price)}</td>
+      <td><span class="pill ${pkg.active ? "paid" : "unpaid"}">${pkg.active ? "Active" : "Inactive"}</span></td>
+      <td>
+        <div class="actions">
+          <button class="btn light small" onclick="editEfootballPackage('${pkg.id}')">Edit</button>
+          <button class="btn danger small" onclick="deleteEfootballPackage('${pkg.id}')">Delete</button>
+        </div>
+      </td>
+    </tr>
+  `).join("");
+}
+
+// Free = Total - Paid (auto)
+["efootballCoins", "efootballPaid"].forEach(id => {
+  $(id).addEventListener("input", () => {
+    const total = Number($("efootballCoins").value);
+    const paid = $("efootballPaid").value.trim();
+    $("efootballFree").value =
+      paid === "" || !total ? "" : Math.max(0, total - Number(paid));
+  });
+});
+
 $("efootballForm").addEventListener("submit", async e => {
   e.preventDefault();
 
   const id = $("efootballId").value;
+  const coinAmount = Number($("efootballCoins").value);
+  const paidRaw = $("efootballPaid").value.trim();
+  const freeRaw = $("efootballFree").value.trim();
+
+  const paid = paidRaw === "" ? null : Number(paidRaw);
+  const free = paid === null
+    ? null
+    : (freeRaw === "" ? coinAmount - paid : Number(freeRaw));
 
   const payload = {
-    coin_amount: Number($("efootballCoins").value),
+    coin_amount: coinAmount,
     price: Number($("efootballPrice").value),
-    active: $("efootballActive").value === "true"
+    active: $("efootballActive").value === "true",
+    paid_coins: paid,
+    free_coins: free
   };
 
-  if (
-    !Number.isInteger(payload.coin_amount) ||
-    payload.coin_amount <= 0 ||
-    !Number.isFinite(payload.price) ||
-    payload.price < 0
-  ) {
-    return message("Please enter valid coin amount and price.", "error");
+  if (!Number.isInteger(coinAmount) || coinAmount <= 0 ||
+      !Number.isFinite(payload.price) || payload.price < 0) {
+    return message("Please enter a valid coin amount and price.", "error");
+  }
+  if (paid !== null && (!Number.isInteger(paid) || paid < 0 || !Number.isInteger(free) || free < 0)) {
+    return message("Paid and Free coins must be whole numbers, 0 or more.", "error");
+  }
+  if (paid !== null && paid + free !== coinAmount) {
+    return message("Paid + Free coins must equal the total coin amount.", "error");
   }
 
   const btn = $("saveEfootballBtn");
@@ -902,52 +908,44 @@ $("efootballForm").addEventListener("submit", async e => {
     ? await client.from("efootball_packages").update(payload).eq("id", id)
     : await client.from("efootball_packages").insert(payload);
 
-btn.disabled = false;
-btn.textContent = id
-  ? "Update Coin Package"
-  : "Save Coin Package";
-  if (result.error) {
-    return message(result.error.message, "error");
-  }
+  btn.disabled = false;
+  btn.textContent = id ? "Update Coin Package" : "Save Coin Package";
+
+  if (result.error) return message(result.error.message, "error");
 
   message(id ? "Coin package updated!" : "Coin package added!");
-resetEfootballForm();
-
+  resetEfootballForm();
   await loadEfootballPackages();
   renderEfootballPackages();
 });
-// EDIT EFOOTBALL PACKAGE
+
 function editEfootballPackage(id) {
   const pkg = efootballPackages.find(p => p.id === id);
-
   if (!pkg) return;
 
   $("efootballId").value = pkg.id;
   $("efootballCoins").value = pkg.coin_amount;
   $("efootballPrice").value = pkg.price;
+  $("efootballPaid").value = pkg.paid_coins ?? "";
+  $("efootballFree").value = pkg.free_coins ?? "";
   $("efootballActive").value = String(pkg.active);
 
   $("efootballFormTitle").textContent = "Edit Coin Package";
   $("saveEfootballBtn").textContent = "Update Coin Package";
 
   showTab("efootball");
-
-  $("efootballForm").scrollIntoView({
-    behavior: "smooth",
-    block: "center"
-  });
+  $("efootballForm").scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-// RESET EFOOTBALL FORM
 function resetEfootballForm() {
   $("efootballForm").reset();
-
   $("efootballId").value = "";
   $("efootballActive").value = "true";
-
   $("efootballFormTitle").textContent = "Add Coin Package";
   $("saveEfootballBtn").textContent = "Save Coin Package";
 }
+
+
 
 async function deleteEfootballPackage(id) {
   const pkg = efootballPackages.find(p => p.id === id);
