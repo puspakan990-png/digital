@@ -18,6 +18,7 @@ body {
   color: #20211f;
   font-family: "DM Sans", sans-serif;
   -webkit-font-smoothing: antialiased;
+  overflow-wrap: break-word;
 }
 
 a {
@@ -678,7 +679,7 @@ button {
 .product-bottom {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-between; 
   border-top: 1px solid #f0efe9;
   margin-top: 20px;
   padding-top: 16px;
@@ -687,12 +688,19 @@ button {
 .price {
   font-size: 12px;
   font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
 }
-
 .price small {
+  display: block;
+  margin-top: 5px;
   font-size: 10px;
   font-weight: 500;
+  line-height: 1.5;
   color: #8b8d83;
+  white-space: normal;
 }
 
 .buy-btn {
@@ -1117,5 +1125,364 @@ button {
   *::before,
   *::after {
     transition: none !important;
+  }
+}
+
+
+/* ========================================
+   PRODUCT PRICE EXTRA TEXT
+======================================== */
+
+.price-note {
+  display: block;
+  margin-top: 5px;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #8b8d83;
+}
+
+
+/* ========================================
+   EFOOTBALL COIN DISPLAY
+======================================== */
+
+.efootball-coin-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 65px;
+  background: linear-gradient(135deg, #f5efd2, #e4d69b);
+}
+
+
+/* ========================================
+   EFOOTBALL PHOTO BACKGROUND BANNER
+======================================== */
+
+.efootball-promo {
+  position: relative;
+  isolation: isolate;
+
+  width: min(1200px, calc(100% - 32px));
+  min-height: 360px;
+
+  margin: 40px auto;
+  padding: clamp(25px, 5vw, 55px);
+
+  display: flex;
+  align-items: center;
+
+  overflow: hidden;
+  box-sizing: border-box;
+  border-radius: 22px;
+
+  color: #ffffff;
+
+  background-image:
+    linear-gradient(
+      90deg,
+      rgba(3, 12, 35, 0.96) 0%,
+      rgba(3, 12, 35, 0.82) 42%,
+      rgba(3, 12, 35, 0.10) 100%
+    ),
+    url("images/efootball-banner.png");
+
+background-size: 100% 100%;
+background-position: center;
+  background-repeat: no-repeat;
+}
+
+
+/* Banner content */
+
+.efootball-promo-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 520px;
+}
+
+
+/* Small label */
+
+.efootball-label {
+  display: inline-block;
+  color: #c5e58b;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+}
+
+
+/* Heading */
+
+.efootball-promo h2 {
+  max-width: 600px;
+  margin: 12px 0 14px;
+
+  color: #ffffff;
+
+  font-size: clamp(26px, 4vw, 42px);
+  line-height: 1.15;
+  font-weight: 800;
+}
+
+
+/* Description */
+
+.efootball-promo p {
+  max-width: 480px;
+  margin: 0 0 25px;
+
+  color: #e0e5ed;
+  font-size: clamp(14px, 1.5vw, 17px);
+  line-height: 1.65;
+}
+
+
+/* Button */
+
+.efootball-promo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 48px;
+  padding: 0 22px;
+
+  border-radius: 9px;
+
+  background: #c5e58b;
+  color: #17251c;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  text-decoration: none;
+
+  transition: 0.2s ease;
+}
+
+.efootball-promo-btn:hover {
+  background: #d7f3a5;
+  transform: translateY(-2px);
+}
+
+
+/* Hide old football emoji */
+
+.efootball-promo-icon {
+  display: none;
+}
+
+
+/* ========================================
+   TABLET RESPONSIVE
+======================================== */
+
+@media (max-width: 768px) {
+
+  .efootball-promo {
+    min-height: 320px;
+    background-position: 58% center;
+  }
+
+}
+
+
+/* ========================================
+   MOBILE RESPONSIVE
+======================================== */
+
+@media (max-width: 520px) {
+
+  .efootball-promo {
+    width: calc(100% - 24px);
+    min-height: 300px;
+
+    margin: 25px auto;
+    padding: 25px 20px;
+
+    border-radius: 15px;
+
+    background-image:
+      linear-gradient(
+        90deg,
+        rgba(3, 12, 35, 0.94),
+        rgba(3, 12, 35, 0.62)
+      ),
+      url("images/efootball-banner.png");
+
+    background-position: 62% center;
+  }
+
+  .efootball-promo-content {
+    max-width: 100%;
+  }
+
+  .efootball-label {
+    font-size: 10px;
+  }
+
+  .efootball-promo h2 {
+    font-size: 27px;
+  }
+
+  .efootball-promo p {
+    font-size: 13px;
+  }
+
+  .efootball-promo-btn {
+    min-height: 44px;
+    padding: 0 15px;
+    font-size: 12px;
+  }
+
+}
+
+
+/* ========================================
+   VERY SMALL PHONES
+======================================== */
+
+@media (max-width: 360px) {
+
+  .efootball-promo {
+    min-height: 280px;
+    padding: 22px 16px;
+  }
+
+  .efootball-promo h2 {
+    font-size: 24px;
+  }
+
+}
+
+/* RESPONSIVE POLISH */
+
+@media (max-width: 1000px) {
+  .efootball-promo {
+    background-size: cover;
+  }
+}
+
+@media (max-width: 760px) {
+  .hero h1 {
+    font-size: clamp(38px, 9vw, 54px);
+    letter-spacing: -.06em;
+  }
+
+  .hero-actions {
+    flex-wrap: wrap;
+    gap: 16px 22px;
+  }
+
+  .trust-line {
+    line-height: 1.8;
+  }
+
+  .product-image {
+    height: clamp(190px, 58vw, 260px);
+  }
+
+  .efootball-promo {
+    background-size: cover;
+  }
+}
+
+@media (max-width: 520px) {
+  .container {
+    width: calc(100% - 28px);
+  }
+
+  .nav-links {
+    padding-inline: 14px;
+  }
+
+  .payment-heading h2,
+  .section-heading h2 {
+    font-size: clamp(29px, 8vw, 36px);
+    letter-spacing: -.06em;
+  }
+
+  .payment-card {
+    gap: 10px;
+    padding: 13px;
+  }
+
+  .payment-status {
+    font-size: 7px;
+    letter-spacing: .6px;
+  }
+
+  .product-info {
+    padding: 18px 16px;
+  }
+
+  .product-info h3 {
+    font-size: 22px;
+  }
+
+  .product-bottom {
+    gap: 10px;
+  }
+
+  .buy-btn {
+    flex: 0 0 auto;
+    padding-inline: 12px;
+    white-space: nowrap;
+  }
+
+  .contact-box {
+    padding: 30px 20px;
+  }
+
+  .contact-box h2 {
+    font-size: clamp(32px, 9vw, 39px);
+  }
+
+  .contact-box .btn {
+    max-width: 100%;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  .container {
+    width: calc(100% - 24px);
+  }
+
+  .brand {
+    font-size: 19px;
+  }
+
+  .hero {
+    padding-top: 38px;
+  }
+
+  .hero h1 {
+    font-size: 37px;
+  }
+
+  .payment-card {
+    flex-wrap: wrap;
+  }
+
+  .payment-status {
+    margin-left: 54px;
+  }
+
+  .product-bottom {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (hover: none) {
+  .product-card:hover {
+    transform: none;
+    box-shadow: none;
   }
 }

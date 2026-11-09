@@ -2,6 +2,7 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
 // Supabase connection
+// Supabase connection
 const config = window.DIGITALNEP_CONFIG;
 
 const supabase = createClient(
@@ -58,6 +59,7 @@ async function loadProducts() {
     }
 
     products.forEach(product => {
+      console.log("Product:", product.name, "Price note:", product.price_note);
       const card = document.createElement("article");
       card.className = "product-card";
 
@@ -99,11 +101,21 @@ async function loadProducts() {
       const bottom = document.createElement("div");
       bottom.className = "product-bottom";
 
-      const price = document.createElement("span");
-      price.className = "price";
-      price.textContent =
-        "Rs. " + Number(product.price).toLocaleString("en-IN");
+    const price = document.createElement("span");
+price.className = "price";
 
+const priceAmount = document.createElement("span");
+priceAmount.textContent =
+  "Rs. " + Number(product.price).toLocaleString("en-IN");
+
+price.appendChild(priceAmount);
+
+if (product.price_note) {
+  const priceNote = document.createElement("small");
+  priceNote.className = "price-note";
+  priceNote.textContent = product.price_note;
+  price.appendChild(priceNote);
+}
       const buyButton = document.createElement("button");
       buyButton.className = "buy-btn";
       buyButton.innerHTML = 'Purchase <span>↗</span>';
@@ -132,4 +144,88 @@ async function loadProducts() {
   }
 }
 
+
+
+
+// Load eFootball coin packages from Supabase
+async function loadEfootballPackages() {
+  const grid = document.getElementById("efootballGrid");
+  const count = document.getElementById("efootballCount");
+
+  if (!grid || !count) return;
+
+  try {
+    const { data: packages, error } = await supabase
+      .from("efootball_packages")
+      .select("*")
+      .eq("active", true)
+      .order("coin_amount", { ascending: true });
+
+    if (error) throw error;
+
+    grid.innerHTML = "";
+    count.textContent =
+      String(packages.length).padStart(2, "0") + " PACKAGES";
+
+    if (!packages.length) {
+      grid.textContent = "No eFootball coin packages available right now.";
+      return;
+    }
+
+    packages.forEach(pkg => {
+      const card = document.createElement("article");
+      card.className = "product-card";
+
+      const imageBox = document.createElement("div");
+      imageBox.className = "product-image efootball-coin-image";
+      imageBox.textContent = "🪙";
+
+      const info = document.createElement("div");
+      info.className = "product-info";
+
+      const category = document.createElement("div");
+      category.className = "product-category";
+      category.textContent = "eFOOTBALL COINS";
+
+      const title = document.createElement("h3");
+      title.textContent =
+        Number(pkg.coin_amount).toLocaleString("en-IN") + " Coins";
+
+      const description = document.createElement("p");
+      description.textContent = "eFootball coin package";
+
+      const bottom = document.createElement("div");
+      bottom.className = "product-bottom";
+
+      const price = document.createElement("span");
+      price.className = "price";
+      price.textContent =
+        "Rs. " + Number(pkg.price).toLocaleString("en-IN");
+
+      const buyButton = document.createElement("button");
+      buyButton.className = "buy-btn";
+      buyButton.innerHTML = 'Purchase <span>↗</span>';
+
+      buyButton.addEventListener("click", () => {
+        const message =
+          `Hi DigitalNep! I want to purchase ${pkg.coin_amount} eFootball Coins for Rs. ${pkg.price}. Please share the ordering details.`;
+
+        window.open(
+          `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`,
+          "_blank"
+        );
+      });
+
+      bottom.append(price, buyButton);
+      info.append(category, title, description, bottom);
+      card.append(imageBox, info);
+      grid.appendChild(card);
+    });
+
+  } catch (error) {
+    console.error("eFootball packages loading error:", error);
+    grid.textContent = "Unable to load eFootball packages.";
+  }
+}
 loadProducts();
+loadEfootballPackages();

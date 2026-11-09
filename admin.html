@@ -81,7 +81,9 @@ td strong{font-weight:700}
 @media(max-width:800px){.stats{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:520px){
  .container{padding:22px 4% 45px}
- .topbar{padding:14px 4%}
+ .topbar{padding:14px 4%;flex-wrap:wrap}
+ .top-actions{max-width:65%;flex-wrap:wrap;justify-content:flex-end}
+ #adminEmail{overflow-wrap:anywhere}
  h1{font-size:25px}
  .stats{gap:9px}
  .stat{padding:14px}
@@ -91,6 +93,7 @@ td strong{font-weight:700}
  .toolbar input,.toolbar select{max-width:none;flex:1 1 100%}
  .tabs{display:grid;grid-template-columns:repeat(2,1fr)}
  .tab{padding:10px 7px}
+ .table-wrap{-webkit-overflow-scrolling:touch}
 }
 </style>
 </head>
@@ -130,11 +133,12 @@ td strong{font-weight:700}
 
   <div id="mainMessage" class="message"></div>
 
-  <div class="tabs">
-    <button class="tab active" data-tab="dashboard">Dashboard</button>
-    <button class="tab" data-tab="sales">Sales Records</button>
-    <button class="tab" data-tab="products">Products</button>
-  </div>
+ <div class="tabs">
+  <button class="tab active" data-tab="dashboard">Dashboard</button>
+  <button class="tab" data-tab="sales">Sales Records</button>
+  <button class="tab" data-tab="products">Products</button>
+  <button class="tab" data-tab="efootball">eFootball Coins</button>
+</div>
 
   <!-- DASHBOARD -->
   <section id="dashboard" class="section active">
@@ -293,15 +297,27 @@ td strong{font-weight:700}
       </div>
       <form id="productForm">
         <input type="hidden" id="productId">
+
         <div class="form-grid">
           <div class="field">
             <label>Product Name *</label>
             <input id="productName" required>
           </div>
-          <div class="field">
-            <label>Price (Rs.) *</label>
-            <input id="productPrice" type="number" min="0" step="0.01" required>
-          </div>
+         
+<div class="field">
+  <label>Price (Rs.) *</label>
+  <input id="productPrice" type="number" min="0" step="0.01" required>
+</div>
+
+<div class="field">
+  <label>Price Note / Extra Text</label>
+  <input
+    id="productPriceNote"
+    type="text"
+    maxlength="150"
+    placeholder="Example: 1 Month Subscription">
+</div>
+
           <div class="field full">
             <label>Description</label>
             <textarea id="productDescription"></textarea>
@@ -327,7 +343,81 @@ td strong{font-weight:700}
       </div>
     </div>
   </section>
+  <!-- EFOOTBALL COINS -->
+<section id="efootball" class="section">
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2 id="efootballFormTitle">Add Coin Package</h2>
+      <button class="btn light small" onclick="resetEfootballForm()">
+        Clear form
+      </button>
+    </div>
+
+    <form id="efootballForm">
+      <input type="hidden" id="efootballId">
+
+      <div class="form-grid">
+        <div class="field">
+          <label>Coin Amount *</label>
+          <input
+            id="efootballCoins"
+            type="number"
+            min="1"
+            step="1"
+            required
+            placeholder="Example: 100">
+        </div>
+
+        <div class="field">
+          <label>Price (Rs.) *</label>
+          <input
+            id="efootballPrice"
+            type="number"
+            min="0"
+            step="0.01"
+            required
+            placeholder="Example: 150">
+        </div>
+
+        <div class="field">
+          <label>Package Status</label>
+          <select id="efootballActive">
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" class="btn dark" id="saveEfootballBtn" style="margin-top:15px">
+  Save Coin Package
+</button>
+    </form>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Your eFootball Packages</h2>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Coins</th>
+            <th>Price</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="efootballTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+</section>
 </main>
+
 
 <script>
 const config = window.DIGITALNEP_CONFIG;
@@ -339,6 +429,7 @@ const BUCKET = "product-images";
 
 let sales = [];
 let products = [];
+let efootballPackages = [];
 let editingSale = false;
 let editingProduct = false;
 
@@ -358,12 +449,21 @@ function statusClass(value) {
 }
 
 function showTab(name) {
-  document.querySelectorAll(".tab").forEach(b => b.classList.toggle("active",b.dataset.tab===name));
-  document.querySelectorAll(".section").forEach(s => s.classList.toggle("active",s.id===name));
-  if (name==="dashboard") renderDashboard();
-  if (name==="sales") renderSales();
-  if (name==="products") renderProducts();
+  document.querySelectorAll(".tab").forEach(b => {
+    b.classList.toggle("active", b.dataset.tab === name);
+  });
+
+  document.querySelectorAll(".section").forEach(s => {
+    s.classList.toggle("active", s.id === name);
+  });
+
+  if (name === "dashboard") renderDashboard();
+  if (name === "sales") renderSales();
+  if (name === "products") renderProducts();
+  if (name === "efootball") renderEfootballPackages();
 }
+
+
 document.querySelectorAll(".tab").forEach(b => b.addEventListener("click",()=>showTab(b.dataset.tab)));
 
 async function checkSession() {
@@ -407,18 +507,77 @@ async function logout() {
 }
 
 async function refreshAll() {
-  await Promise.all([loadProducts(),loadSales()]);
+  await Promise.all([
+    loadProducts(),
+    loadSales(),
+    loadEfootballPackages()
+  ]);
+
   renderDashboard();
   renderSales();
   renderProducts();
+  renderEfootballPackages();
   fillProductSelect();
 }
-
 async function loadProducts() {
   const {data,error}=await client.from("products").select("*").order("created_at",{ascending:false});
   if(error) throw error;
   products=data||[];
 }
+async function loadEfootballPackages() {
+  const { data, error } = await client
+    .from("efootball_packages")
+    .select("*")
+    .order("coin_amount", { ascending: true });
+
+  if (error) throw error;
+
+  efootballPackages = data || [];
+}
+
+
+function renderEfootballPackages() {
+  const table = $("efootballTable");
+
+  if (!table) return;
+
+  if (efootballPackages.length === 0) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="4" class="empty">
+          No eFootball packages added yet.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  table.innerHTML = efootballPackages.map(pkg => `
+    <tr>
+      <td>${Number(pkg.coin_amount).toLocaleString("en-IN")} Coins</td>
+      <td>${money(pkg.price)}</td>
+      <td>
+        <span class="pill ${pkg.active ? "paid" : "unpaid"}">
+          ${pkg.active ? "Active" : "Inactive"}
+        </span>
+      </td>
+      <td>
+        <div class="actions">
+          <button class="btn light small"
+            onclick="editEfootballPackage('${pkg.id}')">
+            Edit
+          </button>
+
+          <button class="btn danger small"
+            onclick="deleteEfootballPackage('${pkg.id}')">
+            Delete
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join("");
+}
+
 
 async function loadSales() {
   const {data,error}=await client.from("sales").select("*").order("sale_date",{ascending:false}).order("created_at",{ascending:false});
@@ -619,6 +778,7 @@ function resetProductForm() {
   $("productPreview").classList.add("hidden");
   $("productFormTitle").textContent="Add New Product";
   $("saveProductBtn").textContent="Save Product";
+  $("productPriceNote").value="";
   editingProduct=false;
 }
 
@@ -641,12 +801,13 @@ $("productForm").addEventListener("submit",async e=>{
     image_url=client.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
   }
 
-  const payload={
-    name:$("productName").value.trim(),
-    price:Number($("productPrice").value),
-    description:$("productDescription").value.trim(),
-    ...(file?{image_url,image_path}:{})
-  };
+const payload={
+  name:$("productName").value.trim(),
+  price:Number($("productPrice").value),
+  price_note:$("productPriceNote").value.trim(),
+  description:$("productDescription").value.trim(),
+  ...(file?{image_url,image_path}:{})
+};
   let result;
   if(id) result=await client.from("products").update(payload).eq("id",id);
   else result=await client.from("products").insert(payload);
@@ -686,8 +847,9 @@ function editProduct(id) {
   showTab("products");
   $("productId").value=p.id;
   $("productName").value=p.name;
-  $("productPrice").value=p.price;
-  $("productDescription").value=p.description||"";
+$("productPrice").value=p.price;
+$("productPriceNote").value=p.price_note||"";
+$("productDescription").value=p.description||"";
   if(p.image_url){$("productPreview").src=p.image_url;$("productPreview").classList.remove("hidden");}
   $("productFormTitle").textContent="Edit Product";
   $("saveProductBtn").textContent="Update Product";
@@ -710,6 +872,105 @@ function escapeHTML(value) {
     "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
   })[ch]);
 }
+
+
+$("efootballForm").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  const id = $("efootballId").value;
+
+  const payload = {
+    coin_amount: Number($("efootballCoins").value),
+    price: Number($("efootballPrice").value),
+    active: $("efootballActive").value === "true"
+  };
+
+  if (
+    !Number.isInteger(payload.coin_amount) ||
+    payload.coin_amount <= 0 ||
+    !Number.isFinite(payload.price) ||
+    payload.price < 0
+  ) {
+    return message("Please enter valid coin amount and price.", "error");
+  }
+
+  const btn = $("saveEfootballBtn");
+  btn.disabled = true;
+  btn.textContent = "Saving...";
+
+  const result = id
+    ? await client.from("efootball_packages").update(payload).eq("id", id)
+    : await client.from("efootball_packages").insert(payload);
+
+btn.disabled = false;
+btn.textContent = id
+  ? "Update Coin Package"
+  : "Save Coin Package";
+  if (result.error) {
+    return message(result.error.message, "error");
+  }
+
+  message(id ? "Coin package updated!" : "Coin package added!");
+resetEfootballForm();
+
+  await loadEfootballPackages();
+  renderEfootballPackages();
+});
+// EDIT EFOOTBALL PACKAGE
+function editEfootballPackage(id) {
+  const pkg = efootballPackages.find(p => p.id === id);
+
+  if (!pkg) return;
+
+  $("efootballId").value = pkg.id;
+  $("efootballCoins").value = pkg.coin_amount;
+  $("efootballPrice").value = pkg.price;
+  $("efootballActive").value = String(pkg.active);
+
+  $("efootballFormTitle").textContent = "Edit Coin Package";
+  $("saveEfootballBtn").textContent = "Update Coin Package";
+
+  showTab("efootball");
+
+  $("efootballForm").scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+}
+
+// RESET EFOOTBALL FORM
+function resetEfootballForm() {
+  $("efootballForm").reset();
+
+  $("efootballId").value = "";
+  $("efootballActive").value = "true";
+
+  $("efootballFormTitle").textContent = "Add Coin Package";
+  $("saveEfootballBtn").textContent = "Save Coin Package";
+}
+
+async function deleteEfootballPackage(id) {
+  const pkg = efootballPackages.find(p => p.id === id);
+  if (!pkg) return;
+
+  if (!confirm(`Delete ${pkg.coin_amount} Coins package permanently?`)) {
+    return;
+  }
+
+  const { error } = await client
+    .from("efootball_packages")
+    .delete()
+    .eq("id", id);
+
+  if (error) return message(error.message, "error");
+
+  message("Coin package deleted.");
+
+  await loadEfootballPackages();
+  renderEfootballPackages();
+}
+
+
 
 client.auth.onAuthStateChange((event,session)=>{
   if(event==="SIGNED_OUT")showLogin();

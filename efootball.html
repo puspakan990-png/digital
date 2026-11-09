@@ -1,0 +1,380 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>eFootball Coins | DigitalNep</title>
+  <meta name="description" content="Explore eFootball coin packages at DigitalNep.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #f8f9f6;
+      color: #20211f;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    header {
+      padding: 19px 6%;
+      background: white;
+      border-bottom: 1px solid #e9e8df;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      font: 700 24px 'Space Grotesk';
+      text-decoration: none;
+      color: #20211f;
+    }
+
+    .brand span { color: #899c5d; }
+
+    header a.back {
+      color: #53633a;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+    }
+/* EFOOTBALL PROMO BANNER */
+.hero {
+  position: relative;
+  isolation: isolate;
+  width: min(1200px, calc(100% - 32px));
+  min-height: 360px;
+  margin: 35px auto;
+  padding: clamp(25px, 5vw, 55px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  text-align: left;
+  overflow: hidden;
+  border-radius: 22px;
+  color: #ffffff;
+
+  background-image:
+    linear-gradient(
+      90deg,
+      rgba(3, 12, 35, 0.96),
+      rgba(3, 12, 35, 0.82) 42%,
+      rgba(3, 12, 35, 0.10)
+    ),
+    url("images/efootball-banner.png");
+
+background-size: 100% 100%;
+background-position: center;
+  background-repeat: no-repeat;
+}
+
+.hero-label {
+  color: #c5e58b;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.hero h1 {
+  max-width: 600px;
+  font: 700 clamp(30px, 5vw, 46px) 'Space Grotesk';
+  margin: 14px 0;
+  color: #ffffff;
+}
+
+.hero p {
+  color: #e0e5ed;
+  max-width: 480px;
+  margin: 0;
+  line-height: 1.7;
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  .hero {
+    min-height: 320px;
+    background-position: 58% center;
+  }
+}
+
+@media (max-width: 520px) {
+  .hero {
+    width: calc(100% - 24px);
+    min-height: 300px;
+    padding: 25px 20px;
+    border-radius: 15px;
+    background-image:
+      linear-gradient(
+        90deg,
+        rgba(3, 12, 35, 0.94),
+        rgba(3, 12, 35, 0.62)
+      ),
+      url("images/efootball-banner.png");
+    background-position: 62% center;
+  }
+
+  .hero h1 {
+    font-size: 29px;
+  }
+
+  .hero p {
+    font-size: 14px;
+  }
+}
+
+    main {
+      max-width: 1100px;
+      margin: auto;
+      padding: 48px 5% 70px;
+    }
+
+    .heading {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .heading h2 {
+      font: 700 29px 'Space Grotesk';
+      margin-bottom: 8px;
+    }
+
+    .heading p {
+      color: #77796f;
+      font-size: 14px;
+    }
+
+    .package-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+    }
+
+    .package-card {
+      background: white;
+      border: 1px solid #e8e9e2;
+      border-radius: 17px;
+  padding: 25px 15px;
+      text-align: center;
+      box-shadow: 0 8px 25px rgba(20,30,20,.045);
+      transition: transform .2s, box-shadow .2s;
+    }
+
+    .package-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(20,30,20,.09);
+    }
+
+.coin-image {
+  width: 280px;
+  height: 230px;
+  max-width: 100%;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 15px;
+}
+
+@media (max-width: 600px) {
+  .coin-image {
+    width: 230px;
+    height: 200px;
+  }
+}
+
+ 
+
+    .package-card h3 {
+      font: 700 22px 'Space Grotesk';
+      margin: 5px 0;
+    }
+
+    .coin-description {
+      color: #77796f;
+      font-size: 13px;
+      margin-bottom: 18px;
+    }
+
+    .package-price {
+      font: 700 26px 'Space Grotesk';
+      margin: 12px 0 20px;
+      color: #536b36;
+    }
+
+    .order-btn {
+      display: block;
+      padding: 13px;
+      border-radius: 9px;
+      background: #899c5d;
+      color: white;
+      font-weight: 800;
+      text-decoration: none;
+      transition: background .2s;
+    }
+
+    .order-btn:hover { background: #71864a; }
+
+    .notice {
+      text-align: center;
+      color: #77796f;
+      font-size: 12px;
+      line-height: 1.6;
+      margin-top: 28px;
+    }
+
+    .empty {
+      text-align: center;
+      color: #77796f;
+      padding: 35px 10px;
+      grid-column: 1 / -1;
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: #77796f;
+      font-size: 12px;
+      border-top: 1px solid #e9e8df;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <a href="index.html" class="brand">Digital<span>Nep.</span></a>
+  <a href="index.html" class="back">← Back to Home</a>
+</header>
+
+<section class="hero">
+  <div class="hero-label">DIGITALNEP GAMING STORE</div>
+  <h1>eFootball Coins</h1>
+  <p>Choose your coin package and contact us to place your order.</p>
+</section>
+
+<main>
+  <div class="heading">
+    <h2>Choose Your Package</h2>
+    <p>Explore our available eFootball coin packages.</p>
+  </div>
+
+  <div class="package-grid" id="packageGrid">
+    <p class="empty">Loading packages...</p>
+  </div>
+
+  <p class="notice">
+    Orders are confirmed through WhatsApp. Never share your account password
+    or one-time verification codes.
+  </p>
+</main>
+
+<footer>
+  © <span id="year"></span> DigitalNep. All rights reserved.
+</footer>
+
+<script src="config.js"></script>
+
+<script type="module">
+  import { createClient } from
+    "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+  const config = window.DIGITALNEP_CONFIG;
+  const grid = document.getElementById("packageGrid");
+
+  document.getElementById("year").textContent =
+    new Date().getFullYear();
+
+  const whatsappNumber = "9779709486638";
+
+  if (!config?.SUPABASE_URL || !config?.SUPABASE_KEY) {
+    grid.innerHTML =
+      '<p class="empty">Store configuration is unavailable.</p>';
+  } else {
+    const supabase = createClient(
+      config.SUPABASE_URL,
+      config.SUPABASE_KEY
+    );
+
+    loadPackages();
+
+    async function loadPackages() {
+      const { data, error } = await supabase
+        .from("efootball_packages")
+        .select("id, coin_amount, price")
+        .eq("active", true)
+        .order("coin_amount", { ascending: true });
+
+
+      if (error) {
+        console.error(error);
+        grid.innerHTML =
+          '<p class="empty">Unable to load packages. Please try again later.</p>';
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        grid.innerHTML =
+          '<p class="empty">No coin packages are currently available. Please check back later.</p>';
+        return;
+      }
+
+      grid.innerHTML = "";
+
+      data.forEach(pkg => {
+        const card = document.createElement("article");
+        card.className = "package-card";
+
+        const amount = Number(pkg.coin_amount);
+        const price = Number(pkg.price);
+
+        const message =
+          `Hello DigitalNep! I am interested in the ${amount} eFootball Coins package priced at Rs. ${price}.`;
+
+        const orderLink =
+          `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+
+       const icon = document.createElement("img");
+icon.src = "images/efootball-coin.jpg";
+icon.alt = "eFootball Coins";
+icon.className = "coin-image";
+
+        const title = document.createElement("h3");
+        title.textContent =
+          amount.toLocaleString("en-IN") + " Coins";
+
+        const description = document.createElement("p");
+        description.className = "coin-description";
+        description.textContent = "eFootball Coin Package";
+
+        const priceElement = document.createElement("div");
+        priceElement.className = "package-price";
+        priceElement.textContent =
+          "Rs. " + price.toLocaleString("en-IN");
+
+        const button = document.createElement("a");
+        button.className = "order-btn";
+        button.href = orderLink;
+        button.target = "_blank";
+        button.rel = "noopener noreferrer";
+        button.textContent = "Order on WhatsApp";
+
+        card.append(
+          icon,
+          title,
+          description,
+          priceElement,
+          button
+        );
+
+        grid.appendChild(card);
+      });
+    }
+  }
+</script>
+
+</body>
+</html>
